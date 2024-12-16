@@ -46,7 +46,7 @@ This script integrates into a comprehensive data import workflow:
 
 2. Run the script:
 ```bash
-python trade_republic_converter.py
+python script.py
 ```
 
 3. The script will generate two files:

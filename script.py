@@ -5,15 +5,21 @@ import json
 from collections import Counter, OrderedDict
 
 # Load the source CSV file
-input_file = "traderepublic_transactions.csv"
+input_file = "transactions.csv"
 output_file = "ghostfolio_transactions.csv"
-account_name = "Account Trade Republic"
+account_name = "Trade Republic"
 json_output_file = "profiles.json"
 df = pd.read_csv(input_file)
 
+def parse_date(timestamp):
+    return datetime.strptime(timestamp, "%d %b %y %H:%M %z")
+
 # Function to format the date
-def format_date(timestamp):
-    return datetime.strptime(timestamp, "%d %b %y %H:%M %z").strftime("%Y-%m-%d")
+def format_date(dt):
+    return dt.strftime("%Y-%m-%d")
+
+start_date = parse_date("1 Jan 20 00:00 +0000")
+ignored_symbols = [ "CA9858441095", "CA42981E1043", "US36467W1099", "CA09228F1036", "US00165C1045", "CA40638K1012", "FR0011398874", "DE000TT5MLT6", "DE000TT6X7W0", "US5949603048", "DE000KE881X8", "DE000KE8CFJ0", "DE000TT7XXS6", "DE000KE5N4H2", "DE000TT75VD7", "DE000TT76CD5" ]
 
 # Transform the DataFrame
 ghostfolio_data = []
@@ -21,21 +27,29 @@ instruments_data = OrderedDict()  # Use OrderedDict to maintain insertion order
 
 for index, row in df.iterrows():
     transaction_type = row["Type"].lower()
-    
-    if transaction_type in ["purchase", "saveback"]:
+
+    if transaction_type in ["purchase", "saveback", "round up"]:
         action = "Buy"
     elif transaction_type == "dividends":
         action = "Dividend"
     else:
         continue  # Skip transactions that don't match the specified types
-    
-    date = format_date(row["Timestamp"])
+
+    dt = parse_date(row["Timestamp"])
+
+    if dt < start_date:
+      continue
+
+    date = format_date(dt)
     shares = row["Shares"]
     price = row["Rate"]
     fee = row["Commission"]
     symbol = row["Instrument"]
     name = row["Name"]
-    
+
+    if symbol in ignored_symbols:
+        continue
+
     ghostfolio_data.append({
         "Date": date,
         "Code": symbol,
@@ -49,14 +63,14 @@ for index, row in df.iterrows():
         "Account": account_name
 
     })
-    
+
     # Add unique instruments to the OrderedDict
     if symbol not in instruments_data:
         instruments_data[symbol] = {
             "symbol": symbol,
             "profile_data": {
                 "assetClass": "EQUITY",
-                "assetSubClass": "STOCK",
+                "assetSubClass": "ETF" if symbol.startswith("IE") else "STOCK",
                 "comment": "",
                 "currency": "EUR",
                 "name": name,

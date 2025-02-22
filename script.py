@@ -20,8 +20,8 @@ def parse_date(timestamp):
 def format_date(dt):
     return dt.strftime("%Y-%m-%d")
 
-start_date = parse_date("1 Jan 20 00:00 +0000")
-ignored_symbols = [ "CA9858441095", "CA42981E1043", "US36467W1099", "CA09228F1036", "US00165C1045", "CA40638K1012", "FR0011398874", "DE000TT5MLT6", "DE000TT6X7W0", "US5949603048", "DE000KE881X8", "DE000KE8CFJ0", "DE000TT7XXS6", "DE000KE5N4H2", "DE000TT75VD7", "DE000TT76CD5", "IE00BYMS5W68" ]
+with open("ignored_symbols.json", "r") as f:
+  ignored_symbols = json.load(f)
 
 # Transform the DataFrame
 ghostfolio_data = []
@@ -38,9 +38,6 @@ for index, row in df.iterrows():
         continue  # Skip transactions that don't match the specified types
 
     dt = parse_date(row["Timestamp"])
-
-    if dt < start_date:
-      continue
 
     date = format_date(dt)
     shares = row["Shares"]
@@ -107,12 +104,12 @@ if ghostfolio_data:
     first_date = min(dates)
     last_date = max(dates)
     instruments_counter = Counter((entry["Code"], entry["Name"]) for entry in ghostfolio_data)
-    
+
     print("\n--- Summary Statistics ---")
     print(f"Number of transactions exported: {num_transactions}")
     print(f"First transaction date: {first_date}")
     print(f"Last transaction date: {last_date}")
-    
+
     print("\nInstrument Summary:")
     print(f"{'Instrument Code':<20}{'Name':<40}{'Occurrences':<10}")
     print("-" * 70)

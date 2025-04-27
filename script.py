@@ -59,8 +59,8 @@ for index, row in df.iterrows():
         "Price": price,
         "Quantity": shares,
         "Fee": fee,
-        "Account": account_name
-
+        "Account": account_name,
+        "Comment": "TR"
     })
 
     # Add unique instruments to the OrderedDict
@@ -84,7 +84,6 @@ for index, row in df.iterrows():
                 "ticker": f"XETR:{symbol}",
                 "start_date": "2021-01-01"
             },
-            "comment": "TR"
         }
 
 # Save the transformed data to CSV

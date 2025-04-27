@@ -87,7 +87,7 @@ for index, row in df.iterrows():
         }
 
 # Save the transformed data to CSV
-fieldnames = ["Date", "Code", "Name", "Action", "Currency", "Price", "Quantity", "Fee", "DataSource", "Account"]
+fieldnames = ["Date", "Code", "Name", "Action", "Currency", "Price", "Quantity", "Fee", "DataSource", "Account", "Comment"]
 with open(output_file, mode="w", newline="") as file:
     writer = csv.DictWriter(file, fieldnames=fieldnames)
     writer.writeheader()
